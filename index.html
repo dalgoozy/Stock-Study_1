@@ -328,59 +328,23 @@ function saveSettings(){
   alert('✅ 저장되었습니다.');
 }
 
-async function fetchOneTicker(ticker){
-  // Naver Finance API (Korean stocks, no CORS issue on most browsers)
-  const code = ticker.replace('.KS','').replace('.KQ','');
-  const naverUrl = `https://m.stock.naver.com/api/stock/${code}/basic`;
-  try {
-    const res = await fetch(naverUrl, {signal:AbortSignal.timeout(6000)});
-    const json = await res.json();
-    if(json && json.closePrice) {
-      const price = parseFloat(json.closePrice.replace(/,/g,''));
-      const change = parseFloat(json.compareToPreviousClosePrice?.replace(/,/g,'')||'0');
-      const pct = parseFloat(json.fluctuationsRatio||'0');
-      const w52h = parseFloat(json.yearlyHighPrice?.replace(/,/g,'')||'0');
-      const w52l = parseFloat(json.yearlyLowPrice?.replace(/,/g,'')||'0');
-      return {price, change, pct, w52h, w52l};
-    }
-  } catch(e) { console.warn('Naver fail:',ticker,e); }
-  // Fallback: Yahoo Finance via query2
-  try {
-    const url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
-    const res = await fetch(url, {signal:AbortSignal.timeout(6000), headers:{'Accept':'application/json'}});
-    const json = await res.json();
-    const meta = json?.chart?.result?.[0]?.meta;
-    if(meta) {
-      return {
-        price: meta.regularMarketPrice,
-        change: meta.regularMarketPrice - meta.previousClose,
-        pct: ((meta.regularMarketPrice - meta.previousClose)/meta.previousClose*100),
-        w52h: meta.fiftyTwoWeekHigh,
-        w52l: meta.fiftyTwoWeekLow
-      };
-    }
-  } catch(e) { console.warn('Yahoo fail:',ticker,e); }
-  return null;
-}
-
 async function fetchPrices(){
-  let success = 0;
-  const results = await Promise.allSettled(HOLDINGS.map(h=>fetchOneTicker(h.ticker)));
-  results.forEach((r,i)=>{
-    if(r.status==='fulfilled' && r.value) {
-      state.prices[HOLDINGS[i].ticker] = r.value;
-      success++;
+  // prices.json은 GitHub Actions가 매일 자동 업데이트
+  try {
+    const res = await fetch('./prices.json?t='+Date.now(), {signal:AbortSignal.timeout(5000)});
+    if(!res.ok) throw new Error('no prices.json');
+    const data = await res.json();
+    if(data.prices) {
+      Object.assign(state.prices, data.prices);
+      const ts = data.updated || '—';
+      document.getElementById('price-date').textContent = ts + ' (자동업데이트)';
+      document.getElementById('last-update').textContent = '자동 업데이트 완료';
+      return true;
     }
-  });
-  const now=new Date();
-  const ts=`${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  if(success > 0){
-    document.getElementById('price-date').textContent=ts+` (${success}/${HOLDINGS.length}종목)`;
-    document.getElementById('last-update').textContent='방금 업데이트';
-    return true;
-  } else {
-    document.getElementById('price-date').textContent='로딩 실패 — 수동 입력 필요';
-    document.getElementById('last-update').textContent='가격 로딩 실패';
+  } catch(e) {
+    console.warn('prices.json 로딩 실패:', e);
+    document.getElementById('price-date').textContent = '자동 업데이트 준비 중 — GitHub Actions 설정 후 작동';
+    document.getElementById('last-update').textContent = '가격 준비 중';
     return false;
   }
 }
@@ -395,11 +359,11 @@ async function marketUpdate(event){
 }
 
 function earningsUpdate(){
-  alert('📊 실적 업데이트\n\n분기 실적 발표 후 이선생이 재무 데이터를 새로 분석하여 업데이트합니다.\n\n다음 실적 발표: 2025년 2Q (2026.07.25 예정)');
+  alert('📊 실적 업데이트\n\n분기 실적 발표 후 이선생이 재무 데이터를 새로 분석하여 업데이트합니다.\n\n다음 실적 발표: 2026년 2Q (2026.07.25 예정)');
 }
 
 function sectorUpdate(){
-  alert('📡 섹터 업데이트\n\n이선생이 각 섹터의 최신 사이클 위치를 분석하여 업데이트합니다.\n현재 데이터: 2025.05.15 기준');
+  alert('📡 섹터 업데이트\n\n이선생이 각 섹터의 최신 사이클 위치를 분석하여 업데이트합니다.\n현재 데이터: 2026.05.16 기준');
 }
 
 function runSearch(){
