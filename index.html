@@ -3,463 +3,586 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📈 주식 공부 Day 1 — AI 활용 기업분석 기초</title>
+<title>Boss 주식 대시보드</title>
 <style>
-  :root {
-    --bg: #0a0e1a; --bg2: #111827; --card: #1a2235; --card2: #1e2a3a;
-    --border: #2a3a50; --text: #e2e8f0; --muted: #8899aa;
-    --blue: #60a5fa; --purple: #c084fc; --green: #4ade80; --yellow: #fbbf24;
-    --orange: #fb923c; --red: #f87171; --pink: #f472b6; --teal: #2dd4bf;
-    --cyan: #22d3ee; --gold: #fcd34d;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; font-size: 15px; line-height: 1.7; }
-  .hero { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%); padding: 40px 20px 30px; text-align: center; border-bottom: 1px solid var(--border); }
-  .hero-badge { display: inline-block; background: rgba(96,165,250,0.15); border: 1px solid var(--blue); color: var(--blue); padding: 4px 14px; border-radius: 20px; font-size: 12px; margin-bottom: 12px; letter-spacing: 1px; }
-  .hero h1 { font-size: 24px; font-weight: 800; background: linear-gradient(135deg, #60a5fa, #c084fc, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 8px; }
-  .hero p { color: var(--muted); font-size: 13px; }
-  .nav { background: var(--bg2); border-bottom: 1px solid var(--border); overflow-x: auto; white-space: nowrap; position: sticky; top: 0; z-index: 100; -webkit-overflow-scrolling: touch; }
-  .nav a { display: inline-block; padding: 12px 14px; color: var(--muted); text-decoration: none; font-size: 12px; transition: color 0.2s; }
-  .nav a:hover { color: var(--text); }
-  .progress-bar { height: 3px; background: linear-gradient(90deg, #60a5fa, #c084fc, #f472b6); width: 100%; }
-  .container { max-width: 720px; margin: 0 auto; padding: 20px 16px 60px; }
-  .section { margin-bottom: 28px; border-radius: 16px; background: var(--card); border: 1px solid var(--border); overflow: hidden; }
-  .section-header { padding: 18px 20px 14px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
-  .section-icon { font-size: 22px; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .section-title h2 { font-size: 17px; font-weight: 700; }
-  .section-title p { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .section-body { padding: 18px 20px; }
-  .oneliner { background: rgba(255,255,255,0.04); border-left: 3px solid; padding: 12px 14px; border-radius: 0 8px 8px 0; margin-bottom: 16px; font-size: 14px; font-weight: 600; }
-  .formula { background: #0d1117; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin: 12px 0; font-family: 'SF Mono', monospace; font-size: 14px; color: var(--teal); text-align: center; }
-  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
-  th { background: rgba(255,255,255,0.06); padding: 8px 10px; text-align: left; font-weight: 600; color: var(--muted); font-size: 12px; }
-  td { padding: 8px 10px; border-top: 1px solid var(--border); }
-  .box { border-radius: 10px; padding: 12px 14px; margin: 10px 0; font-size: 13px; }
-  .box-blue { background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.3); }
-  .box-green { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); }
-  .box-yellow { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); }
-  .box-red { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); }
-  .box-teal { background: rgba(45,212,191,0.1); border: 1px solid rgba(45,212,191,0.3); }
-  .box-cyan { background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.3); }
-  .box-purple { background: rgba(192,132,252,0.1); border: 1px solid rgba(192,132,252,0.3); }
-  .portfolio { background: var(--card2); border-radius: 10px; padding: 14px; margin-top: 14px; border: 1px solid var(--border); }
-  .portfolio-label { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
-  .keypoint { background: linear-gradient(135deg, rgba(96,165,250,0.08), rgba(192,132,252,0.08)); border: 1px solid rgba(96,165,250,0.2); border-radius: 10px; padding: 12px 14px; margin-top: 12px; font-size: 13px; }
-  .matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
-  .matrix-cell { border-radius: 10px; padding: 12px; font-size: 12px; text-align: center; }
-  .lights { display: flex; gap: 10px; margin: 12px 0; flex-wrap: wrap; }
-  .light { flex: 1; min-width: 90px; background: var(--card2); border-radius: 12px; padding: 14px 10px; text-align: center; border: 1px solid var(--border); }
-  .light-dot { font-size: 28px; margin-bottom: 6px; }
-  .light-label { font-size: 11px; color: var(--muted); }
-  .light-name { font-size: 13px; font-weight: 700; margin: 4px 0; }
-  .steps { margin: 12px 0; }
-  .step { display: flex; gap: 14px; margin-bottom: 14px; align-items: flex-start; }
-  .step-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; flex-shrink: 0; }
-  .step-content { flex: 1; }
-  .step-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
-  .step-desc { font-size: 13px; color: var(--muted); }
-  .moat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
-  .moat-item { background: var(--card2); border-radius: 10px; padding: 12px; border: 1px solid var(--border); }
-  .moat-icon { font-size: 20px; margin-bottom: 6px; }
-  .moat-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
-  .moat-desc { font-size: 11px; color: var(--muted); }
-  .summary { background: linear-gradient(135deg, #0f172a, #1e1b4b); border: 1px solid rgba(96,165,250,0.3); border-radius: 16px; padding: 20px; margin-bottom: 28px; }
-  .summary h3 { color: var(--blue); font-size: 16px; margin-bottom: 14px; }
-  .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-  .summary-item { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 10px 8px; text-align: center; }
-  .summary-icon { font-size: 18px; margin-bottom: 4px; }
-  .summary-name { font-size: 11px; color: var(--muted); }
-  .gauge-wrap { margin: 12px 0; }
-  .gauge-label { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px; }
-  .gauge-bar { height: 8px; border-radius: 4px; background: var(--border); }
-  .gauge-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #4ade80, #fbbf24, #f87171); width: 100%; }
-  .c-blue { color: var(--blue); } .c-purple { color: var(--purple); } .c-green { color: var(--green); }
-  .c-yellow { color: var(--yellow); } .c-orange { color: var(--orange); } .c-red { color: var(--red); }
-  .c-pink { color: var(--pink); } .c-teal { color: var(--teal); } .c-cyan { color: var(--cyan); } .c-gold { color: var(--gold); }
-  .bg-blue { background: rgba(96,165,250,0.15); } .bg-purple { background: rgba(192,132,252,0.15); }
-  .bg-green { background: rgba(74,222,128,0.15); } .bg-orange { background: rgba(251,146,60,0.15); }
-  .bg-red { background: rgba(248,113,113,0.15); } .bg-yellow { background: rgba(251,191,36,0.15); }
-  .bg-teal { background: rgba(45,212,191,0.15); } .bg-pink { background: rgba(244,114,182,0.15); }
-  .bg-cyan { background: rgba(34,211,238,0.15); } .bg-gold { background: rgba(252,211,77,0.15); }
-  @media (max-width: 480px) {
-    .matrix { grid-template-columns: 1fr; }
-    .moat-grid { grid-template-columns: 1fr; }
-    .summary-grid { grid-template-columns: repeat(3, 1fr); }
-  }
+:root {
+  --bg-primary:#0a0e1a; --bg-secondary:#111827; --bg-card:#1a2235; --bg-hover:#1f2d45;
+  --border:#1f2937; --border-light:#2d3748;
+  --text-primary:#f9fafb; --text-secondary:#9ca3af; --text-muted:#6b7280;
+  --accent:#3b82f6; --accent-dark:#2563eb;
+  --green:#10b981; --red:#ef4444; --yellow:#f59e0b;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg-primary);color:var(--text-primary);font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;min-height:100vh;}
+.header{background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:14px 20px;position:sticky;top:0;z-index:200;}
+.header-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
+.header-left h1{font-size:1.1rem;font-weight:700;color:var(--accent);}
+.header-left p{font-size:0.7rem;color:var(--text-muted);margin-top:2px;}
+.header-right{font-size:0.7rem;color:var(--text-muted);text-align:right;}
+.live-dot{display:inline-block;width:6px;height:6px;background:var(--green);border-radius:50%;margin-right:4px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.tabs{background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:0 20px;}
+.tabs-inner{max-width:1200px;margin:0 auto;display:flex;}
+.tab{padding:12px 20px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-muted);font-size:0.88rem;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
+.tab:hover:not(.active){color:var(--text-secondary);}
+.main{max-width:1200px;margin:0 auto;padding:20px;}
+.section{display:none;}
+.section.active{display:block;}
+.btn{padding:9px 16px;border-radius:8px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-blue{background:var(--accent);color:#fff;}.btn-blue:hover{background:var(--accent-dark);}
+.btn-outline{background:transparent;color:var(--text-secondary);border:1px solid var(--border-light);}
+.btn-outline:hover{background:var(--bg-hover);color:var(--text-primary);}
+.btn-green{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3);}
+.btn-group{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;}
+.card-title{font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;}
+.info-banner{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:10px 14px;font-size:0.78rem;color:#93c5fd;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.warn-banner{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:10px 14px;font-size:0.78rem;color:var(--yellow);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:0.72rem;font-weight:700;white-space:nowrap;}
+.badge-strong-buy{background:rgba(16,185,129,.2);color:var(--green);border:1px solid var(--green);}
+.badge-buy{background:rgba(16,185,129,.1);color:#34d399;border:1px solid #34d399;}
+.badge-hold{background:rgba(245,158,11,.1);color:var(--yellow);border:1px solid var(--yellow);}
+.badge-reduce{background:rgba(239,68,68,.1);color:#f87171;border:1px solid #f87171;}
+.badge-sell{background:rgba(239,68,68,.2);color:var(--red);border:1px solid var(--red);}
+.badge-pending{background:rgba(107,114,128,.1);color:var(--text-muted);border:1px solid var(--border-light);}
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:0.83rem;}
+thead th{padding:10px 12px;color:var(--text-muted);font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
+tbody td{padding:12px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr{cursor:pointer;transition:background .15s;}
+tbody tr:hover td{background:rgba(59,130,246,.04);}
+.stock-name-cell .name{font-weight:600;}
+.stock-name-cell .ticker{font-size:0.68rem;color:var(--text-muted);}
+.price-up{color:#f87171;font-weight:600;}.price-dn{color:#60a5fa;font-weight:600;}.price-flat{color:var(--text-secondary);}
+.pnl-pos{color:#f87171;font-weight:700;}.pnl-neg{color:#60a5fa;font-weight:700;}
+.gauge-wrap{min-width:80px;}
+.gauge-track{background:var(--border);border-radius:4px;height:5px;position:relative;}
+.gauge-fill{height:100%;border-radius:4px;}
+.gauge-pin{position:absolute;top:-4px;width:13px;height:13px;border-radius:50%;transform:translateX(-50%);border:2px solid var(--bg-card);}
+.gauge-nums{display:flex;justify-content:space-between;font-size:0.6rem;color:var(--text-muted);margin-top:3px;}
+.clusters{display:flex;gap:6px;}
+.cluster-pill{display:flex;flex-direction:column;align-items:center;background:var(--bg-secondary);border-radius:8px;padding:5px 8px;}
+.cluster-pill .c-label{font-size:0.58rem;color:var(--text-muted);margin-bottom:2px;white-space:nowrap;}
+.cluster-pill .c-signal{font-size:0.95rem;}
+.stock-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:10px;}
+.stock-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+.sc-left .sc-name{font-size:1.05rem;font-weight:700;}
+.sc-left .sc-meta{font-size:0.72rem;color:var(--text-muted);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;}
+.sc-right{text-align:right;}
+.sc-price{font-size:1.25rem;font-weight:700;}
+.sc-change{font-size:0.78rem;margin-top:2px;}
+.sc-body{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+@media(max-width:600px){.sc-body{grid-template-columns:1fr;}}
+.sc-box{background:var(--bg-secondary);border-radius:8px;padding:12px;}
+.sc-box-title{font-size:0.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;}
+.metrics-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.metric-m{background:var(--bg-card);border-radius:6px;padding:8px;text-align:center;}
+.metric-m .m-val{font-size:0.92rem;font-weight:700;}
+.metric-m .m-lbl{font-size:0.62rem;color:var(--text-muted);margin-top:2px;cursor:help;}
+.metric-m .m-sub{font-size:0.58rem;color:var(--text-muted);}
+.pos-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.pos-item .p-lbl{font-size:0.65rem;color:var(--text-muted);}
+.pos-item .p-val{font-size:0.9rem;font-weight:600;margin-top:2px;}
+.analysis-box{background:var(--bg-secondary);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:10px 12px;margin-bottom:10px;}
+.analysis-box .a-title{font-size:0.67rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;display:flex;justify-content:space-between;}
+.analysis-box .a-text{font-size:0.82rem;color:var(--text-secondary);line-height:1.6;}
+.stoploss-row{display:flex;flex-direction:column;gap:5px;}
+.sl-stage{display:flex;align-items:center;gap:8px;font-size:0.75rem;padding:6px 8px;border-radius:6px;}
+.sl-ok{color:var(--text-muted);}.sl-warn{background:rgba(245,158,11,.1);color:var(--yellow);}.sl-danger{background:rgba(239,68,68,.1);color:var(--red);}
+.sl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dot-ok{background:var(--border-light);}.dot-warn{background:var(--yellow);}.dot-danger{background:var(--red);box-shadow:0 0 5px var(--red);}
+.settings-panel{display:none;background:var(--bg-secondary);border:1px solid var(--accent);border-radius:12px;padding:18px;margin-bottom:16px;}
+.settings-panel.open{display:block;}
+.settings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;margin-top:12px;}
+.settings-row{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg-card);border-radius:8px;}
+.s-name{flex:1;font-size:0.83rem;font-weight:600;}
+.s-group{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+.s-input{width:88px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:5px;padding:5px 8px;color:var(--text-primary);font-size:0.78rem;text-align:right;}
+.s-input:focus{outline:none;border-color:var(--accent);}
+.s-lbl{font-size:0.6rem;color:var(--text-muted);}
+.search-box{display:flex;gap:10px;margin-bottom:20px;}
+.search-input{flex:1;background:var(--bg-card);border:1px solid var(--border-light);border-radius:10px;padding:12px 16px;color:var(--text-primary);font-size:0.93rem;outline:none;transition:border-color .2s;}
+.search-input:focus{border-color:var(--accent);}
+.search-input::placeholder{color:var(--text-muted);}
+.placeholder-box{background:var(--bg-card);border:2px dashed var(--border-light);border-radius:12px;padding:40px 20px;text-align:center;color:var(--text-muted);}
+.placeholder-box .ph-icon{font-size:2.2rem;margin-bottom:10px;}
+.placeholder-box p{font-size:0.85rem;line-height:1.6;}
+.sector-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;}
+.sector-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all .2s;}
+.sector-card:hover{border-color:var(--accent);}
+.sector-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.sector-card-top .s-name{font-weight:600;font-size:0.93rem;}
+.s-cycle{font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:20px;}
+.cycle-bottom{background:rgba(16,185,129,.15);color:var(--green);}
+.cycle-early{background:rgba(59,130,246,.15);color:var(--accent);}
+.cycle-mid{background:rgba(245,158,11,.15);color:var(--yellow);}
+.cycle-top{background:rgba(239,68,68,.15);color:var(--red);}
+.sector-card p{font-size:0.77rem;color:var(--text-muted);line-height:1.5;margin-bottom:10px;}
+.sector-signals{display:flex;gap:6px;}
+.s-sig-item{display:flex;flex-direction:column;align-items:center;background:var(--bg-secondary);border-radius:6px;padding:4px 8px;}
+.s-sig-item .si-lbl{font-size:0.58rem;color:var(--text-muted);}
+.s-sig-item .si-val{font-size:0.85rem;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--bg-card);border:1px solid var(--border-light);border-radius:14px;padding:22px;max-width:420px;width:100%;}
+.modal-box h3{font-size:1rem;font-weight:700;margin-bottom:10px;color:var(--accent);}
+.modal-box p{font-size:0.85rem;color:var(--text-secondary);line-height:1.7;}
+.modal-close{float:right;background:none;border:none;color:var(--text-muted);font-size:1.1rem;cursor:pointer;margin-top:-4px;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg-primary);}::-webkit-scrollbar-thumb{background:var(--border-light);border-radius:3px;}
+@media(max-width:768px){.main{padding:12px;}.tab{padding:11px 10px;font-size:0.78rem;}.clusters{flex-wrap:wrap;}thead th,tbody td{padding:8px 6px;}}
 </style>
 </head>
 <body>
-<div class="progress-bar"></div>
-<div class="hero">
-  <div class="hero-badge">AI 활용 기업분석 기초</div>
-  <h1>📈 주식 공부 Day 1</h1>
-  <p>오늘 배운 핵심 지표 13가지 · 출퇴근길 복습용</p>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="header-left">
+      <h1>📊 Boss 주식 대시보드</h1>
+      <p>사이클 투자 분석 시스템 · powered by 이선생</p>
+    </div>
+    <div class="header-right">
+      <span class="live-dot"></span><span id="last-update">초기화 중...</span>
+    </div>
+  </div>
 </div>
-<nav class="nav">
-  <a href="#per">📊 PER</a><a href="#pbr">📚 PBR</a><a href="#matrix">🎯 매트릭스</a>
-  <a href="#profit">💰 영업이익</a><a href="#roe">⚡ ROE</a><a href="#debt">🛡 재무건전성</a>
-  <a href="#moat">🏰 Moat</a><a href="#signal">🚦 신호등</a><a href="#eps">📈 EPS</a>
-  <a href="#fcf">💵 FCF</a><a href="#week52">📅 52주</a><a href="#stoploss">🛑 손절룰</a>
-</nav>
-<div class="container">
 
-  <div class="summary">
-    <h3>🗂 오늘 배운 것들 — 한눈에 보기</h3>
-    <div class="summary-grid">
-      <div class="summary-item"><div class="summary-icon">📊</div><div class="summary-name">PER</div></div>
-      <div class="summary-item"><div class="summary-icon">📚</div><div class="summary-name">PBR</div></div>
-      <div class="summary-item"><div class="summary-icon">🎯</div><div class="summary-name">2x2 매트릭스</div></div>
-      <div class="summary-item"><div class="summary-icon">💰</div><div class="summary-name">영업이익률</div></div>
-      <div class="summary-item"><div class="summary-icon">⚡</div><div class="summary-name">ROE</div></div>
-      <div class="summary-item"><div class="summary-icon">🛡</div><div class="summary-name">재무건전성</div></div>
-      <div class="summary-item"><div class="summary-icon">🏰</div><div class="summary-name">Moat</div></div>
-      <div class="summary-item"><div class="summary-icon">🚦</div><div class="summary-name">투자환경 신호등</div></div>
-      <div class="summary-item"><div class="summary-icon">📈</div><div class="summary-name">EPS · PEG</div></div>
-      <div class="summary-item"><div class="summary-icon">💵</div><div class="summary-name">현금흐름 FCF</div></div>
-      <div class="summary-item"><div class="summary-icon">📅</div><div class="summary-name">52주 위치</div></div>
-      <div class="summary-item"><div class="summary-icon">🛑</div><div class="summary-name">손절 룰</div></div>
+<div class="tabs">
+  <div class="tabs-inner">
+    <button class="tab" onclick="switchTab('s1')">🔍 종목 검색</button>
+    <button class="tab active" onclick="switchTab('s2')">💼 보유 종목</button>
+    <button class="tab" onclick="switchTab('s3')">📡 섹터 스크리닝</button>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- 섹션 1 -->
+<div id="s1" class="section">
+  <div class="search-box">
+    <input class="search-input" type="text" id="search-input" placeholder="종목명 입력 (예: 삼성전자, POSCO홀딩스)" onkeydown="if(event.key==='Enter')runSearch()">
+    <button class="btn btn-blue" onclick="runSearch()">🔍 분석 시작</button>
+  </div>
+  <div id="s1-result">
+    <div class="placeholder-box">
+      <div class="ph-icon">🔍</div>
+      <p>종목명을 입력하고 분석 시작을 누르면<br>3개 클러스터 전체 분석 결과를 제공합니다.<br><br>
+      <span style="font-size:0.78rem">가치평가 · 기업체력 · 타이밍 + Moat 분석</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- 섹션 2 -->
+<div id="s2" class="section active">
+  <div class="btn-group">
+    <button class="btn btn-blue" onclick="marketUpdate(event)">📈 시장 업데이트</button>
+    <button class="btn btn-outline" onclick="earningsUpdate()">📊 실적 업데이트</button>
+    <button class="btn btn-outline" onclick="toggleSettings()">⚙️ 보유 종목 설정</button>
+  </div>
+
+  <div class="info-banner">
+    ℹ️ <span><b>주가 기준:</b> <span id="price-date">로딩 중</span> &nbsp;|&nbsp; <b>실적 기준:</b> 2026년 1Q (2026.04.25) &nbsp;|&nbsp; 다음 실적 발표: <b>2026.07.25 예정</b></span>
+  </div>
+
+  <div class="settings-panel" id="settings-panel">
+    <div class="card-title">⚙️ 보유 종목 설정 — 평균 매수가 &amp; 수량</div>
+    <div class="settings-grid" id="settings-grid"></div>
+    <div style="margin-top:14px;display:flex;gap:10px;">
+      <button class="btn btn-green" onclick="saveSettings()">✅ 저장</button>
+      <button class="btn btn-outline" onclick="toggleSettings()">닫기</button>
     </div>
   </div>
 
-  <!-- PER -->
-  <div class="section" id="per">
-    <div class="section-header">
-      <div class="section-icon bg-blue">📊</div>
-      <div class="section-title">
-        <h2 class="c-blue">PER <span style="font-weight:400;font-size:13px;color:var(--muted)">(주가수익비율 · Price to Earnings Ratio)</span></h2>
-        <p>이 회사를 지금 가격에 사면 몇 년 만에 본전을 뽑냐</p>
-      </div>
-    </div>
-    <div class="section-body">
-      <div class="oneliner" style="border-color:var(--blue)">💡 낮을수록 싸다 — 하지만 업종 맥락 없이 절대값만 보면 오판한다</div>
-      <div class="formula">PER = 주가 ÷ EPS (주당순이익)</div>
-      <table>
-        <tr><th colspan="2">PER 판단 4가지 기준</th></tr>
-        <tr><td>① 업종 평균</td><td>같은 섹터 내 평균과 비교</td></tr>
-        <tr><td>② 시장 전체</td><td>코스피 평균 PER (보통 10~15배)</td></tr>
-        <tr><td>③ 역사적 평균</td><td>이 종목의 과거 평균 PER과 비교</td></tr>
-        <tr><td>④ 글로벌 동종</td><td>해외 경쟁사와 비교 (예: 마이크론)</td></tr>
-      </table>
-      <div class="box box-yellow">⚠️ <strong>버블 주의:</strong> 업종 전체가 과열이면 서로 비교해도 의미 없다. PEG로 보완.</div>
-      <div class="formula" style="color:var(--purple)">PEG = PER ÷ EPS 성장률 → 1 이하 = 성장 대비 저평가</div>
-      <div class="portfolio">
-        <div class="portfolio-label">📌 현대차 적용 예시</div>
-        <p style="font-size:13px">PER 약 5~7배 — 시장이 아직 "그냥 자동차 회사"로 봄. 로봇 사업이 부각되면 <span class="c-blue">PER 재평가로 주가 상승</span> 가능.</p>
-      </div>
-    </div>
+  <div class="card">
+    <div class="card-title">📋 전 종목 한눈에 비교</div>
+    <div class="tbl-wrap"><table><thead><tr>
+      <th>종목</th><th>현재가</th><th>수익률</th><th>52주 위치</th><th>클러스터</th><th>투자의견</th>
+    </tr></thead><tbody id="summary-tbody"></tbody></table></div>
   </div>
 
-  <!-- PBR -->
-  <div class="section" id="pbr">
-    <div class="section-header">
-      <div class="section-icon bg-purple">📚</div>
-      <div class="section-title">
-        <h2 class="c-purple">PBR <span style="font-weight:400;font-size:13px;color:var(--muted)">(주가순자산비율 · Price to Book Ratio)</span></h2>
-        <p>주가가 회사의 실제 자산 가치보다 몇 배 비싸냐</p>
-      </div>
-    </div>
-    <div class="section-body">
-      <div class="oneliner" style="border-color:var(--purple)">💡 PBR 1배 = 주가 ≥ 청산가치 — 업종 무관하게 의미 있는 절대 기준</div>
-      <div class="formula" style="color:var(--purple)">PBR = 주가 ÷ 주당순자산(BPS)</div>
-      <table>
-        <tr><th>업종</th><th>보통 PBR</th><th>이유</th></tr>
-        <tr><td>은행/금융</td><td class="c-yellow">0.3~0.7배</td><td>자산이 대출/리스크로 구성</td></tr>
-        <tr><td>제조업</td><td class="c-blue">1~2배</td><td>공장/설비 등 실물자산</td></tr>
-        <tr><td>반도체/IT</td><td class="c-green">3~10배</td><td>무형자산이 장부에 미반영</td></tr>
-        <tr><td>바이오</td><td class="c-red">10배 이상</td><td>파이프라인 가치</td></tr>
-      </table>
-      <div class="keypoint"><strong>핵심:</strong> PBR도 업종 비교 필수. 단, <strong class="c-purple">"1배 기준선"</strong>이라는 절대 기준도 동시에 확인.</div>
-    </div>
-  </div>
+  <div class="card-title" style="margin-bottom:12px;">🗂️ 종목별 세부 분석</div>
+  <div id="stock-cards"></div>
+</div>
 
-  <!-- 2x2 Matrix -->
-  <div class="section" id="matrix">
-    <div class="section-header">
-      <div class="section-icon" style="background:linear-gradient(135deg,rgba(96,165,250,0.2),rgba(192,132,252,0.2))">🎯</div>
-      <div class="section-title">
-        <h2 style="background:linear-gradient(135deg,#60a5fa,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">PER × PBR 2×2 매트릭스</h2>
-        <p>두 지표를 함께 보면 훨씬 강력해진다</p>
-      </div>
-    </div>
-    <div class="section-body">
-      <div class="matrix">
-        <div class="matrix-cell" style="background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.3)">
-          <div style="font-size:20px;margin-bottom:6px">🟢</div>
-          <strong class="c-green">PER 낮 + PBR 낮</strong>
-          <p style="font-size:11px;color:var(--muted);margin-top:4px">진짜 저평가. 가장 강한 매수 신호.</p>
-        </div>
-        <div class="matrix-cell" style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3)">
-          <div style="font-size:20px;margin-bottom:6px">🟡</div>
-          <strong class="c-yellow">PER 낮 + PBR 높</strong>
-          <p style="font-size:11px;color:var(--muted);margin-top:4px">자산은 많은데 이익이 적음.</p>
-        </div>
-        <div class="matrix-cell" style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3)">
-          <div style="font-size:20px;margin-bottom:6px">🟡</div>
-          <strong class="c-yellow">PER 높 + PBR 낮</strong>
-          <p style="font-size:11px;color:var(--muted);margin-top:4px">자산 없지만 돈 잘 버는 회사. IT기업 多.</p>
-        </div>
-        <div class="matrix-cell" style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3)">
-          <div style="font-size:20px;margin-bottom:6px">🔴</div>
-          <strong class="c-red">PER 높 + PBR 높</strong>
-          <p style="font-size:11px;color:var(--muted);margin-top:4px">성장 기대 매우 큼. 거품 주의.</p>
-        </div>
-      </div>
-    </div>
+<!-- 섹션 3 -->
+<div id="s3" class="section">
+  <div class="info-banner">
+    📡 <b>사이클 바닥 / 회복 초입</b> 섹터를 우선 표시합니다. "핫한 섹터"가 아닌 <b>아직 안 오른 섹터</b> 발굴이 목적입니다.
   </div>
-
-  <!-- 영업이익 -->
-  <div class="section" id="profit">
-    <div class="section-header">
-      <div class="section-icon bg-orange">💰</div>
-      <div class="section-title">
-        <h2 class="c-orange">영업이익 & 영업이익률</h2>
-        <p>회사가 본업으로 얼마나 잘 벌고 있냐</p>
-      </div>
-    </div>
-    <div class="section-body">
-      <div class="oneliner" style="border-color:var(--orange)">💡 순이익보다 중요 — 진짜 장사로 번 돈만 본다</div>
-      <div class="formula" style="color:var(--orange)">영업이익률 = 영업이익 ÷ 매출 × 100</div>
-      <div class="box box-yellow">💡 <strong>왜 순이익이 아닌 영업이익?</strong><br>순이익은 건물 팔거나 세금 혜택으로 뻥튀기될 수 있다. 영업이익은 진짜 사업 실력.</div>
-      <table>
-        <tr><th>업종</th><th>평균 영업이익률</th></tr>
-        <tr><td>반도체 (SK하이닉스)</td><td class="c-green">호황기 30~40%</td></tr>
-        <tr><td>자동차 (현대차)</td><td class="c-blue">5~10%</td></tr>
-        <tr><td>조선 (한화오션)</td><td class="c-yellow">3~8%</td></tr>
-        <tr><td>전력기기 (LS ELECTRIC)</td><td class="c-purple">7~12%</td></tr>
-      </table>
-      <div class="box box-teal">🔄 <strong>대시보드에서는:</strong> 최근 <strong>3년 분기별 추이</strong> (12개 데이터). 1년은 너무 짧다 — 사이클 산업은 최소 3년!</div>
-      <div class="portfolio">
-        <div class="portfolio-label">📌 SK하이닉스 적용</div>
-        <p style="font-size:13px">2023년 적자 → 2024년 AI 메모리 호황으로 급반등. Boss의 260% 수익 = 영업이익 회복 사이클을 정확히 탄 것.</p>
-      </div>
-    </div>
+  <div class="btn-group">
+    <button class="btn btn-blue" onclick="sectorUpdate()">🔄 섹터 분석 업데이트</button>
+    <span style="font-size:0.75rem;color:var(--text-muted)">마지막 분석: <span id="sector-date">2026.05.16</span></span>
   </div>
-
-  <!-- ROE -->
-  <div class="section" id="roe">
-    <div class="section-header">
-      <div class="section-icon bg-green">⚡</div>
-      <div class="section-title">
-        <h2 class="c-green">ROE <span style="font-weight:400;font-size:13px;color:var(--muted)">(자기자본이익률 · Return on Equity)</span></h2>
-        <p>회사가 주주 돈을 얼마나 효율적으로 굴리냐</p>
-      </div>
-    </div>
-    <div class="section-body">
-      <div class="oneliner" style="border-color:var(--green)">💡 높을수록 돈 잘 버는 구조 — 단, 이유를 반드시 확인</div>
-      <div class="formula" style="color:var(--green)">ROE = 순이익 ÷ 자기자본 × 100</div>
-      <table>
-        <tr><th>ROE 상승 요인</th><th>신호</th></tr>
-        <tr><td>순이익률이 높아서</td><td class="c-green">✅ 좋음 — 장사를 잘 하는 것</td></tr>
-        <tr><td>자산을 빠르게 굴려서</td><td class="c-green">✅ 좋음 — 효율적 운영</td></tr>
-        <tr><td>빚을 많이 써서</td><td class="c-red">⚠️ 주의 — 레버리지 왜곡</td></tr>
-      </table>
-      <div class="box box-red">⚠️ <strong>ROE + 부채비율은 항상 세트!</strong> 빚으로 ROE를 부풀리는 경우를 반드시 걸러야 한다.</div>
-      <div class="box box-green">⭐ <strong>5년 이상 업종 평균 ROE를 꾸준히 웃돌면 → 경쟁 우위(Moat) 신호!</strong><br>버핏이 ROE 15% 이상 기업 선호하는 이유.</div>
-      <div class="keypoint"><strong>사이클 업종 주의:</strong> ROE가 극단적으로 오르내린다. 단년도 아닌 <strong>5년 평균 ROE</strong>로 판단.</div>
-    </div>
-  </div>
-
-  <!-- 재무건전성 -->
-  <div class="section" id="debt">
-    <div class="section-header">
-      <div class="section-icon bg-red">🛡</div>
-      <div class="section-title">
-        <h2 class="c-red">재무건전성</h2>
-        <p>부채비율 + 순부채비율 + 이자보상배율 + 유동비율</p>
-      </div>
-    </div>
-    <div class="section-body">
-      <div class="oneliner" style="border-color:var(--red)">💡 빚이 많다고 위험한 게 아니라 — 갚을 능력이 있냐가 핵심</div>
-      <table>
-        <tr><th>지표</th><th>공식</th><th>기준</th></tr>
-        <tr><td><strong class="c-red">부채비율</strong></td><td style="font-size:12px">총부채÷자기자본×100</td><td style="font-size:12px">200% 이하 무난</td></tr>
-        <tr><td><strong class="c-orange">순부채비율</strong></td><td style="font-size:12px">(총부채-현금)÷자기자본</td><td style="font-size:12px">현금 많으면 실질위험↓</td></tr>
-        <tr><td><strong class="c-yellow">이자보상배율</strong></td><td style="font-size:12px">영업이익÷이자비용</td><td style="font-size:12px">3배↑안전 / <span class="c-red">1배↓위험🔴</span></td></tr>
-        <tr><td><strong class="c-blue">유동비율</strong></td><td style="font-size:12px">유동자산÷유동부채</td><td style="font-size:12px">200%↑안전 / 100%↓위험</td></tr>
-      </table>
-      <div class="box box-yellow">💡 <strong>한화오션 같은 조선주</strong>는 부채비율이 원래 높다. 이자보상배율 + 수주잔량을 같이 봐야 진짜 위험 여부 알 수 있다.</div>
-    </div>
-  </div>
-
-  <!-- Moat -->
-  <div class="section" id="moat">
-    <div class="section-header">
-      <div class="section-icon bg-gold">🏰</div>
-      <div class="section-title">
-        <h2 class="c-gold">Moat (경제적 해자)</h2>
-        <p>경쟁자들이 넘어올 수 없는 회사만의 방어선</p>
-      </div>
-    </div>
-    <div class="section-body">
-      <div class="oneliner" style="border-color:var(--gold)">💡 5년 이상 높은 ROE 유지 = Moat의 증거 / Moat 있으면 사이클 타이밍 덜 정밀해도 됨</div>
-      <div class="moat-grid">
-        <div class="moat-item"><div class="moat-icon">🏷</div><div class="moat-name c-blue">브랜드 파워</div><div class="moat-desc">더 비싸도 사는 심리<br>예) 애플</div></div>
-        <div class="moat-item"><div class="moat-icon">🔒</div><div class="moat-name c-purple">전환 비용</div><div class="moat-desc">바꾸기 너무 귀찮거나 비쌈<br>예) SAP, MS Office</div></div>
-        <div class="moat-item"><div class="moat-icon">🌐</div><div class="moat-name c-green">네트워크 효과</div><div class="moat-desc">많이 쓸수록 더 가치 있음<br>예) 카카오톡</div></div>
-        <div class="moat-item"><div class="moat-icon">⚙️</div><div class="moat-name c-orange">원가 우위</div><div class="moat-desc">경쟁사보다 싸게 만듦<br>예) 아마존 물류</div></div>
-        <div class="moat-item" style="grid-column:span 2"><div class="moat-icon">🧬</div><div class="moat-name c-teal">독점 자산 / 특허</div><div class="moat-desc">이 기술/자산은 우리만 보유 · SK하이닉스 HBM, 제약사 신약특허</div></div>
-      </div>
-      <div class="box box-yellow">⚠️ <strong>Moat 침식 주의:</strong> 노키아·코닥 → 강한 Moat도 기술 변화로 무너진다. 3개월마다 재검토 필수.</div>
-      <div class="portfolio">
-        <div class="portfolio-label">📌 Boss 포트폴리오 Moat 평가</div>
-        <table style="margin:0">
-          <tr><td><strong>SK하이닉스</strong></td><td class="c-green">⭐⭐⭐ HBM 기술 + 규모의 경제</td></tr>
-          <tr><td><strong>삼성전자</strong></td><td class="c-yellow">⭐⭐ 브랜드 (파운드리 약화 중)</td></tr>
-          <tr><td><strong>현대차</strong></td><td class="c-blue">⭐⭐ 로봇 기술 (성장 중)</td></tr>
-          <tr><td><strong>인텔리안테크</strong></td><td class="c-teal">⭐⭐ 틈새 위성 특허</td></tr>
-          <tr><td><strong>LS ELECTRIC</strong></td><td class="c-red">⭐ Moat 약함 → ⚠️ 사이클 타이밍 중요</td></tr>
-          <tr><td><strong>효성중공업</strong></td><td class="c-red">⭐ Moat 약함 → ⚠️ 사이클 타이밍 중요</td></tr>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- 신호등 -->
-  <div class="section" id="signal">
-    <div class="section-header">
-      <div class="section-icon" style="background:rgba(255,255,255,0.06)">🚦</div>
-      <div class="section-title">
-        <h2>투자환경 신호등 × Moat 연계</h2>
-        <p>3가지 층위 + Moat = 최강 매수/매도 판단 프레임</p>
-      </div>
-    </div>
-    <div class="section-body">
-      <div class="oneliner" style="border-color:var(--blue)">💡 세 가지가 모두 🟢일 때 + Moat ⭐⭐⭐ = 인생 매수 기회</div>
-      <div class="lights">
-        <div class="light"><div class="light-dot">🌍</div><div class="light-name">매크로</div><div class="light-label">금리·경기·환율</div></div>
-        <div class="light"><div class="light-dot">🌊</div><div class="light-name">구조적 트렌드</div><div class="light-label">AI·에너지전환·방산</div></div>
-        <div class="light"><div class="light-dot">🔄</div><div class="light-name">사이클</div><div class="light-label">업황 재고·공급 흐름</div></div>
-      </div>
-      <table>
-        <tr><th>Moat</th><th>신호등</th><th>권고</th></tr>
-        <tr><td>⭐⭐⭐ 강함</td><td>🟢🟢🟢</td><td class="c-green">강력 매수</td></tr>
-        <tr><td>⭐⭐⭐ 강함</td><td>🟡🟡🟡</td><td class="c-blue">분할 매수 / 보유</td></tr>
-        <tr><td>⭐⭐⭐ 강함</td><td>🔴🔴🔴</td><td class="c-yellow">비중 축소 (장기 보유 가능)</td></tr>
-        <tr><td>⭐ 약함</td><td>🟢🟢🟢</td><td class="c-blue">매수 (목표가 설정 필수)</td></tr>
-        <tr><td>⭐ 약함</td><td>🔴🔴🔴</td><td class="c-red">적극 매도</td></tr>
-      </table>
-      <div class="box box-blue">💡 <strong>SK하이닉스 성공 비결:</strong> 매크로 회복 🟢 + AI 구조적 수요 🟢 + 반도체 사이클 바닥 🟢 + HBM Moat ⭐⭐⭐ → 모든 조건 일치!</div>
-    </div>
-  </div>
-
-  <!-- EPS -->
-  <div class="section" id="eps">
-    <div class="section-header">
-      <div class="section-icon bg-teal">📈</div>
-      <div class="section-title">
-        <h2 class="c-teal">EPS & PEG <span style="font-weight:400;font-size:13px;color:var(--muted)">(주당순이익 · Earnings Per Share)</span></h2>
-        <p>주식 한 주당 얼마를 버냐 — PER의 재료</p>
-      </div>
-    </div>
-    <div class="section-body">
-      <div class="oneliner" style="border-color:var(--teal)">💡 EPS가 오르면 PER이 자동으로 낮아진다 → 주가 상승의 원동력</div>
-      <div class="formula" style="color:var(--teal)">EPS = 당기순이익 ÷ 발행 주식 수</div>
-      <div class="formula" style="color:var(--purple)">PEG = PER ÷ EPS 성장률 → 1 이하 = 성장 대비 저평가</div>
-      <div class="box box-teal">🎯 <strong>어닝 서프라이즈:</strong> 실제 EPS &gt; 예상 EPS → 주가 급등<br>🎯 <strong>어닝 쇼크:</strong> 실제 EPS &lt; 예상 EPS → 주가 급락</div>
-      <div class="box box-yellow">⚠️ <strong>애널리스트 컨센서스 주의!</strong><br>절대값이 아닌 <strong>방향</strong>을 봐야 함.<br>• 최근 3개월 추정치 상향 중 ✅ / 하향 중 ⚠️<br>• 목표주가는 구조적으로 항상 20~30% 높게 설정됨 → 참고만!</div>
-    </div>
-  </div>
-
-  <!-- FCF -->
-  <div class="section" id="fcf">
-    <div class="section-header">
-      <div class="section-icon bg-cyan">💵</div>
-      <div class="section-title">
-        <h2 class="c-cyan">현금흐름 FCF <span style="font-weight:400;font-size:13px;color:var(--muted)">(Free Cash Flow)</span></h2>
-        <p>장부상 이익이 아닌 진짜 통장에 남는 돈</p>
-      </div>
-    </div>
-    <div class="section-body">
-      <div class="oneliner" style="border-color:var(--cyan)">💡 영업이익은 장부, FCF는 진짜 통장 잔고 — 조작이 훨씬 어렵다</div>
-      <div class="formula" style="color:var(--cyan)">FCF = 영업현금흐름 - 설비투자(CAPEX)</div>
-      <div class="box box-red">🚨 <strong>흑자도산:</strong> 이익은 나는데 현금 없어서 망하는 것. 영업이익↑ FCF↓ → ⚠️ 이익 품질 확인!</div>
-      <table>
-        <tr><th>FCF 상태</th><th>의미</th></tr>
-        <tr><td>꾸준히 플러스</td><td class="c-green">✅ Moat 증거, 재투자·배당 여력 있음</td></tr>
-        <tr><td>영업이익↑ FCF↓</td><td class="c-yellow">⚠️ 매출채권·재고 쌓이는 중</td></tr>
-        <tr><td>마이너스 + 부채↑</td><td class="c-red">🔴 유동성 위기 가능성</td></tr>
-      </table>
-      <div class="box box-cyan">🔗 <strong>다른 지표 자동 연동:</strong><br>• ROE 높 + FCF 낮 → 이익 품질 경고<br>• FCF 3년 연속 플러스 → Moat 강도 가산<br>• 사이클 바닥: FCF 마이너스 전환 = 설비투자 축소 시작 = 반등 선행 신호</div>
-    </div>
-  </div>
-
-  <!-- 52주 -->
-  <div class="section" id="week52">
-    <div class="section-header">
-      <div class="section-icon bg-pink">📅</div>
-      <div class="section-title">
-        <h2 class="c-pink">52주 최고/최저가 위치</h2>
-        <p>매수엔 보조 도구, 매도엔 핵심 도구</p>
-      </div>
-    </div>
-    <div class="section-body">
-      <div class="oneliner" style="border-color:var(--pink)">💡 가치 투자로 "무엇을 살지" 결정, 52주 위치로 "언제 팔지" 결정</div>
-      <div class="formula" style="color:var(--pink)">위치 = (현재가 - 52주최저) ÷ (52주최고 - 52주최저) × 100</div>
-      <div class="gauge-wrap">
-        <div class="gauge-label"><span class="c-green">🟢 0~20% 매수관심</span><span style="color:var(--muted)">50%</span><span class="c-red">🔴 80~100% 주의</span></div>
-        <div class="gauge-bar"><div class="gauge-fill"></div></div>
-      </div>
-      <table>
-        <tr><th>섹션</th><th>52주 역할</th></tr>
-        <tr><td>섹션1 (종목 검색)</td><td>타이밍 보조 — 하단에 작게 표시</td></tr>
-        <tr><td>섹션2 (보유 종목)</td><td class="c-pink">매도 판단 전용 카드 — 메인 표시</td></tr>
-      </table>
-      <div class="box box-red">🔴 <strong>자동 경고:</strong> 52주 최저가 이탈 → 펀더멘털 재검토 트리거<br>🟡 <strong>재검토 알림:</strong> 고점 대비 -20% 이상 하락</div>
-      <div class="keypoint"><strong>핵심 통찰:</strong> 좋은 성장주는 52주 신고가를 계속 갱신한다. 신고가라고 너무 일찍 팔지 말 것.</div>
-    </div>
-  </div>
-
-  <!-- 손절 룰 -->
-  <div class="section" id="stoploss">
-    <div class="section-header">
-      <div class="section-icon bg-red">🛑</div>
-      <div class="section-title">
-        <h2 class="c-red">손절 룰 — 3단계 구조</h2>
-        <p>장 열리기 전 냉정할 때 미리 정해두는 것이 핵심</p>
-      </div>
-    </div>
-    <div class="section-body">
-      <div class="oneliner" style="border-color:var(--red)">💡 가장 먼저 물을 것: "내가 이 주식을 산 이유가 여전히 유효한가?"</div>
-      <div class="box box-yellow">⚠️ <strong>고정 비율 손절의 함정:</strong> -7%나 -15%는 임의적인 숫자. 좋은 주식도 -10% 찍고 회복한다. 가격이 아닌 이유로 판단하라.</div>
-      <div class="steps">
-        <div class="step">
-          <div class="step-num" style="background:rgba(251,191,36,0.2);color:var(--yellow)">1</div>
-          <div class="step-content">
-            <div class="step-title c-yellow">🟡 재검토 트리거 (아직 매도 아님)</div>
-            <div class="step-desc">고점 대비 -15% OR 52주 위치 20% 이하<br>"매수 이유 여전히 유효한가?" 점검만.</div>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num" style="background:rgba(251,146,60,0.2);color:var(--orange)">2</div>
-          <div class="step-content">
-            <div class="step-title c-orange">🟠 비중 축소</div>
-            <div class="step-desc">고점 대비 -25% OR 매수 이유 50% 이상 훼손<br>보유 물량의 절반 매도. 심리적 부담 절반으로.</div>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num" style="background:rgba(248,113,113,0.2);color:var(--red)">3</div>
-          <div class="step-content">
-            <div class="step-title c-red">🔴 전량 매도</div>
-            <div class="step-desc">52주 최저가 이탈 OR 투자 이유 완전 소멸<br>감정 없이 실행. 1·2단계에서 이미 절반 정리됨.</div>
-          </div>
-        </div>
-      </div>
-      <div class="box box-green">✅ <strong>핵심 원칙:</strong> 매수 전에 이유를 텍스트로 기록 → 이유 살아있으면 가격이 내려도 보유 → 이유 사라지면 수익 중이어도 매도.</div>
-      <div class="portfolio">
-        <div class="portfolio-label">📌 현대로템 교훈</div>
-        <p style="font-size:13px">-7% 손절은 잘 하셨지만, 미리 매수 이유를 써두면 더 일찍, 더 명확하게 결정할 수 있었을 것. <span class="c-blue">다음 매수 전에 이유 먼저 적기.</span></p>
-      </div>
-    </div>
-  </div>
-
-  <div style="text-align:center;padding:30px 20px;color:var(--muted);font-size:13px;background:var(--card);border-radius:16px;border:1px solid var(--border)">
-    <div style="font-size:28px;margin-bottom:10px">🎉</div>
-    <p style="font-size:15px;color:var(--text);font-weight:700;margin-bottom:6px">Day 1 공부 완료!</p>
-    <p style="margin-bottom:12px">다음 세션: <span class="c-blue">최종 스코어링 시스템 설계</span></p>
-    <p>모든 지표를 유기적으로 엮어서<br>강력매수 / 분할매수 / 관망 / 비중축소 / 매도<br>자동 판단 기준을 Boss와 함께 만들 예정</p>
-    <p style="margin-top:12px;font-size:11px">Made with Claude Cowork</p>
-  </div>
+  <div class="sector-grid" id="sector-grid"></div>
+</div>
 
 </div>
+
+<div class="modal-overlay" id="modal" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3 id="modal-title"></h3>
+    <p id="modal-body"></p>
+  </div>
+</div>
+
+<script>
+const HOLDINGS=[
+  {id:'hynix',name:'SK하이닉스',ticker:'000660.KS',sector:'반도체',moat:'⭐⭐⭐',moatType:'원가우위·기술특허',avgPrice:0,qty:0,
+   c1:'🟢',c2:'🟢',c3:'🟡',signal:'buy',per:18.2,pbr:1.8,roe:21.3,perVsAvg:'업종 대비 -12%',
+   week52H:245500,week52L:117800,
+   analysis:'DRAM 가격 3분기 연속 상승 + HBM 점유율 50% 이상으로 사이클 회복과 구조적 성장이 동시 진행 중. 재무체력 양호, FCF 전환율 정상 수준. 반대 신호: 중국 경쟁사 저가 공세 심화, 사이클 고점 시기 불확실.',
+   analysisDate:'2026.05.16'},
+  {id:'samsung',name:'삼성전자',ticker:'005930.KS',sector:'반도체·가전',moat:'⭐⭐⭐',moatType:'브랜드·원가우위',avgPrice:0,qty:0,
+   c1:'🟡',c2:'🟢',c3:'🟡',signal:'hold',per:14.1,pbr:1.1,roe:12.8,perVsAvg:'업종평균 근접',
+   week52H:88800,week52L:49900,
+   analysis:'HBM 경쟁력 회복 지연으로 가치평가 🟡. 파운드리 적자 지속이 FCF 압박. 단 PBR 1.1배는 역사적 저점 수준으로 하방 제한적. 실적 반등 확인 후 비중 확대 검토 구간. 반대 신호: HBM 점유율 회복 속도 불확실.',
+   analysisDate:'2026.05.16'},
+  {id:'hyundai',name:'현대차',ticker:'005380.KS',sector:'자동차',moat:'⭐⭐',moatType:'브랜드·원가우위',avgPrice:0,qty:0,
+   c1:'🟢',c2:'🟢',c3:'🟡',signal:'buy',per:5.2,pbr:0.6,roe:14.1,perVsAvg:'업종 대비 -31%',
+   week52H:282500,week52L:195500,
+   analysis:'PER 5.2배, PBR 0.6배로 극도의 저평가 구간. ROE 14% 양호, FCF 전환율 정상. Moat 있어 저점 분할 매수 유효. 반대 신호: 글로벌 자동차 수요 둔화 + 전기차 전환 비용 증가로 타이밍 🟡.',
+   analysisDate:'2026.05.16'},
+  {id:'ls',name:'LS ELECTRIC',ticker:'010120.KS',sector:'전력기기',moat:'⭐⭐',moatType:'원가우위·특허',avgPrice:0,qty:0,
+   c1:'🟡',c2:'🟢',c3:'🟢',signal:'buy',per:12.8,pbr:1.4,roe:16.2,perVsAvg:'업종평균 근접',
+   week52H:265000,week52L:108500,
+   analysis:'전력망 투자 사이클 초입 수혜. 미국 IRA·유럽 그린딜 수주 증가세. 타이밍 🟢. 반대 신호: 52주 위치 고점 근처 — 신규 매수는 분할 접근 권장. 수주잔량 증가 추세 지속 확인 필요.',
+   analysisDate:'2026.05.16'},
+  {id:'hanwha',name:'한화오션',ticker:'042660.KS',sector:'조선',moat:'⭐⭐',moatType:'원가우위·기술특허',avgPrice:0,qty:0,
+   c1:'🟡',c2:'🟡',c3:'🟢',signal:'hold',per:null,pbr:1.9,roe:null,perVsAvg:'적자로 PER 미산정',
+   week52H:62300,week52L:22400,
+   analysis:'수주잔량 사상 최대, 신조선가 상승 지속으로 타이밍 🟢. 단 실적 회복 초입으로 PER 미산정 상태. 실적 가시화 시 상방 여력 큼. ⚠️ Moat 상대적으로 약함 — 사이클 타이밍 이탈 시 신속 대응 필요.',
+   analysisDate:'2026.05.16'},
+  {id:'intellian',name:'인텔리안테크',ticker:'189300.KQ',sector:'위성통신',moat:'⭐⭐',moatType:'기술특허·전환비용',avgPrice:0,qty:0,
+   c1:'🟡',c2:'🟡',c3:'🟡',signal:'hold',per:38.1,pbr:2.3,roe:6.2,perVsAvg:'업종 대비 +45%',
+   week52H:89500,week52L:34100,
+   analysis:'LEO 위성 성장 테마 수혜 기업. 구조적 성장 스토리 유효. 반대 신호: PER 38배 고평가, ROE 6.2%로 수익성 낮음 — 실적 개선 확인 전까지 현 수준 유지, 추가 매수 자제 권고.',
+   analysisDate:'2026.05.16'},
+  {id:'hyosung',name:'효성중공업',ticker:'298040.KS',sector:'전력기기',moat:'⭐⭐',moatType:'원가우위·특허',avgPrice:0,qty:0,
+   c1:'🟢',c2:'🟢',c3:'🟢',signal:'strong-buy',per:8.9,pbr:1.2,roe:18.4,perVsAvg:'업종 대비 -22%',
+   week52H:198000,week52L:71400,
+   analysis:'3개 클러스터 모두 🟢. PER 8.9배 저평가 + ROE 18.4% 우수 + 미국 변압기 수요 급증으로 수주 폭증 중. FCF 전환율 양호. 현 보유 종목 중 가장 매력적인 구간으로 판단.',
+   analysisDate:'2026.05.16'}
+];
+
+const SECTORS=[
+  {name:'전력기기·변압기',cycle:'회복 초입',cycleClass:'cycle-early',desc:'AI 데이터센터 + 전력망 노후 교체 수요 급증. 납기 2~3년, 수주잔량 사상 최대.',c1:'🟢',c2:'🟢',c3:'🟢'},
+  {name:'조선·해양',cycle:'회복 초입',cycleClass:'cycle-early',desc:'신조선가 상승 지속, LNG선 발주 증가. 수주잔량 3년치 이상 확보.',c1:'🟡',c2:'🟢',c3:'🟢'},
+  {name:'방산',cycle:'사이클 중반',cycleClass:'cycle-mid',desc:'글로벌 국방비 증가 추세 지속. 단 52주 고점 근처 종목 다수 — 신규 진입 신중.',c1:'🟡',c2:'🟢',c3:'🟡'},
+  {name:'반도체 메모리',cycle:'회복 중반',cycleClass:'cycle-mid',desc:'DRAM 가격 회복 중반. HBM 구조적 성장 겹침. 신규 진입보다 보유 점검 구간.',c1:'🟡',c2:'🟢',c3:'🟡'},
+  {name:'화학·정유',cycle:'바닥 근처',cycleClass:'cycle-bottom',desc:'중국 수요 부진으로 수년째 침체. 회복 신호 불명확하나 밸류에이션 역사적 저점.',c1:'🟢',c2:'🟡',c3:'🟡'},
+  {name:'자동차',cycle:'바닥 근처',cycleClass:'cycle-bottom',desc:'글로벌 판매 둔화 + EV 전환 비용. PBR 0.5~0.7배 역사적 저점. 턴어라운드 대기.',c1:'🟢',c2:'🟢',c3:'🟡'},
+];
+
+const TOOLTIPS={
+  'PER':'PER (주가수익비율, Price to Earnings Ratio)\n\n주가 ÷ 주당순이익(EPS)입니다.\n투자자가 1원의 이익을 얻기 위해 얼마를 지불하는지 나타냅니다.\n\n낮을수록 상대적 저평가입니다. 단, 업종 평균과 비교해야 의미가 있습니다.\n\n사이클 산업은 실적이 바닥일 때 PER이 높게 나와 고평가처럼 보이는 함정이 있습니다.',
+  'PBR':'PBR (주가순자산비율, Price to Book Ratio)\n\n주가 ÷ 주당순자산(BPS)입니다.\n회사 장부 가치 대비 시장이 얼마나 프리미엄을 주는지 보여줍니다.\n\n1배 이하 = 청산가치보다 싸다는 의미입니다.\n가치주 판별의 핵심 지표이며 1배 기준선이 중요합니다.',
+  'ROE':'ROE (자기자본이익률, Return on Equity)\n\n순이익 ÷ 자기자본입니다.\n주주가 맡긴 돈으로 얼마나 벌었는지 보여주는 수익성 지표입니다.\n\n5년 평균 ROE가 업종 평균을 꾸준히 웃돌면 Moat(경쟁 우위) 신호입니다.\n\n⚠️ ROE가 높아도 부채 증가가 원인이면 레버리지 왜곡입니다.',
+  'Moat':'Moat (경제적 해자, Economic Moat)\n\n워런 버핏이 사용한 개념입니다.\n경쟁자가 넘기 어려운 구조적 우위를 의미합니다.\n\n종류: 브랜드 / 전환비용 / 네트워크 / 원가우위 / 특허\n\nMoat가 강할수록 사이클 타이밍이 덜 정밀해도 됩니다.\nMoat가 없는 종목은 타이밍이 전부입니다.',
+  'FCF':'FCF (잉여현금흐름, Free Cash Flow)\n\n영업활동 현금흐름 - 설비투자(CAPEX)입니다.\n실제로 회사에 남는 현금을 나타냅니다.\n\n영업이익이 높아도 FCF가 낮으면 이익 품질을 의심해야 합니다.\n3년 연속 FCF 플러스는 Moat 강도에 긍정적 신호입니다.',
+};
+
+let state={prices:{},settings:{}};
+HOLDINGS.forEach(h=>{state.settings[h.id]={avgPrice:h.avgPrice,qty:h.qty};});
+
+function switchTab(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const idx={s1:0,s2:1,s3:2}[id];
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+}
+
+function buildSettingsGrid(){
+  document.getElementById('settings-grid').innerHTML=HOLDINGS.map(h=>{
+    const s=state.settings[h.id];
+    return `<div class="settings-row">
+      <span class="s-name">${h.name}</span>
+      <div class="s-group">
+        <input class="s-input" id="sp-${h.id}" type="number" placeholder="0" value="${s.avgPrice||''}">
+        <span class="s-lbl">평균매수가(원)</span>
+      </div>
+      <div class="s-group">
+        <input class="s-input" id="sq-${h.id}" type="number" placeholder="0" value="${s.qty||''}">
+        <span class="s-lbl">보유수량(주)</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleSettings(){
+  const p=document.getElementById('settings-panel');
+  if(!p.classList.contains('open')){buildSettingsGrid();p.classList.add('open');}
+  else p.classList.remove('open');
+}
+
+function saveSettings(){
+  HOLDINGS.forEach(h=>{
+    const p=parseFloat(document.getElementById('sp-'+h.id)?.value)||0;
+    const q=parseInt(document.getElementById('sq-'+h.id)?.value)||0;
+    state.settings[h.id]={avgPrice:p,qty:q};
+  });
+  document.getElementById('settings-panel').classList.remove('open');
+  renderAll();
+  alert('✅ 저장되었습니다.');
+}
+
+async function fetchOneTicker(ticker){
+  // Naver Finance API (Korean stocks, no CORS issue on most browsers)
+  const code = ticker.replace('.KS','').replace('.KQ','');
+  const naverUrl = `https://m.stock.naver.com/api/stock/${code}/basic`;
+  try {
+    const res = await fetch(naverUrl, {signal:AbortSignal.timeout(6000)});
+    const json = await res.json();
+    if(json && json.closePrice) {
+      const price = parseFloat(json.closePrice.replace(/,/g,''));
+      const change = parseFloat(json.compareToPreviousClosePrice?.replace(/,/g,'')||'0');
+      const pct = parseFloat(json.fluctuationsRatio||'0');
+      const w52h = parseFloat(json.yearlyHighPrice?.replace(/,/g,'')||'0');
+      const w52l = parseFloat(json.yearlyLowPrice?.replace(/,/g,'')||'0');
+      return {price, change, pct, w52h, w52l};
+    }
+  } catch(e) { console.warn('Naver fail:',ticker,e); }
+  // Fallback: Yahoo Finance via query2
+  try {
+    const url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
+    const res = await fetch(url, {signal:AbortSignal.timeout(6000), headers:{'Accept':'application/json'}});
+    const json = await res.json();
+    const meta = json?.chart?.result?.[0]?.meta;
+    if(meta) {
+      return {
+        price: meta.regularMarketPrice,
+        change: meta.regularMarketPrice - meta.previousClose,
+        pct: ((meta.regularMarketPrice - meta.previousClose)/meta.previousClose*100),
+        w52h: meta.fiftyTwoWeekHigh,
+        w52l: meta.fiftyTwoWeekLow
+      };
+    }
+  } catch(e) { console.warn('Yahoo fail:',ticker,e); }
+  return null;
+}
+
+async function fetchPrices(){
+  let success = 0;
+  const results = await Promise.allSettled(HOLDINGS.map(h=>fetchOneTicker(h.ticker)));
+  results.forEach((r,i)=>{
+    if(r.status==='fulfilled' && r.value) {
+      state.prices[HOLDINGS[i].ticker] = r.value;
+      success++;
+    }
+  });
+  const now=new Date();
+  const ts=`${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  if(success > 0){
+    document.getElementById('price-date').textContent=ts+` (${success}/${HOLDINGS.length}종목)`;
+    document.getElementById('last-update').textContent='방금 업데이트';
+    return true;
+  } else {
+    document.getElementById('price-date').textContent='로딩 실패 — 수동 입력 필요';
+    document.getElementById('last-update').textContent='가격 로딩 실패';
+    return false;
+  }
+}
+
+async function marketUpdate(event){
+  const btn=event.target;
+  const orig=btn.textContent;
+  btn.textContent='⏳ 업데이트 중...';btn.disabled=true;
+  await fetchPrices();
+  renderAll();
+  btn.textContent=orig;btn.disabled=false;
+}
+
+function earningsUpdate(){
+  alert('📊 실적 업데이트\n\n분기 실적 발표 후 이선생이 재무 데이터를 새로 분석하여 업데이트합니다.\n\n다음 실적 발표: 2025년 2Q (2026.07.25 예정)');
+}
+
+function sectorUpdate(){
+  alert('📡 섹터 업데이트\n\n이선생이 각 섹터의 최신 사이클 위치를 분석하여 업데이트합니다.\n현재 데이터: 2025.05.15 기준');
+}
+
+function runSearch(){
+  const q=document.getElementById('search-input').value.trim();
+  if(!q)return;
+  document.getElementById('s1-result').innerHTML=`
+    <div class="info-banner">⏳ "${q}" 분석 기능은 v2에서 구현 예정입니다.</div>
+    <div class="placeholder-box"><div class="ph-icon">🔄</div>
+    <p>현재는 섹션 2 보유종목 분석을 먼저 이용해 주세요.</p></div>`;
+}
+
+function fmt(n){return n!=null?n.toLocaleString('ko-KR'):'—';}
+function fmtP(n){return n!=null?(n>=0?'+':'')+n.toFixed(1)+'%':'—';}
+
+function signalBadge(sig){
+  const m={'strong-buy':['🟢🟢 강력 매수','badge-strong-buy'],'buy':['🟢 분할 매수','badge-buy'],'hold':['🟡 보유 관망','badge-hold'],'reduce':['🔴 비중 축소','badge-reduce'],'sell':['🔴🔴 매도','badge-sell'],'pending':['⏳ 분석 대기','badge-pending']};
+  const[l,c]=m[sig]||m['pending'];
+  return `<span class="badge ${c}">${l}</span>`;
+}
+
+function gaugeColor(p){return p>=80?'#ef4444':p>=50?'#f59e0b':'#10b981';}
+
+function gaugeHTML(pct,h,l){
+  const c=gaugeColor(pct);
+  return `<div class="gauge-wrap"><div class="gauge-track">
+    <div class="gauge-fill" style="width:${pct}%;background:${c}"></div>
+    <div class="gauge-pin" style="left:${pct}%;background:${c}"></div>
+  </div><div class="gauge-nums"><span>${fmt(l)}</span><span style="color:${c};font-weight:700">${pct.toFixed(0)}%</span><span>${fmt(h)}</span></div></div>`;
+}
+
+function w52pos(price,h,l){if(!price||!h||!l||h===l)return null;return Math.min(100,Math.max(0,Math.round(((price-l)/(h-l))*100)));}
+function pnlCls(v){return v>0?'pnl-pos':v<0?'pnl-neg':'';}
+function priceCls(v){return v>0?'price-up':v<0?'price-dn':'price-flat';}
+
+function renderSummary(){
+  document.getElementById('summary-tbody').innerHTML=HOLDINGS.map(h=>{
+    const p=state.prices[h.ticker];const s=state.settings[h.id];
+    const price=p?.price;const high=p?.w52h||h.week52H;const low=p?.w52l||h.week52L;
+    const pos=price?w52pos(price,high,low):null;
+    const avgP=s.avgPrice;
+    const pnlPct=(price&&avgP)?((price-avgP)/avgP*100):null;
+    const clu=`<div class="clusters">
+      <div class="cluster-pill"><span class="c-label">가치</span><span class="c-signal">${h.c1}</span></div>
+      <div class="cluster-pill"><span class="c-label">체력</span><span class="c-signal">${h.c2}</span></div>
+      <div class="cluster-pill"><span class="c-label">타이밍</span><span class="c-signal">${h.c3}</span></div></div>`;
+    return `<tr onclick="scrollToCard('${h.id}')">
+      <td><div class="stock-name-cell"><div class="name">${h.name}</div><div class="ticker">${h.ticker}</div></div></td>
+      <td class="${priceCls(p?.change||0)}">${price?fmt(Math.round(price))+'원':'—'}<br><span style="font-size:0.68rem">${p?.pct!=null?fmtP(p.pct):''}</span></td>
+      <td class="${pnlPct!=null?pnlCls(pnlPct):''}">${pnlPct!=null?fmtP(pnlPct):avgP?'—':'<span style="color:var(--text-muted);font-size:0.72rem">미입력</span>'}</td>
+      <td>${pos!=null?gaugeHTML(pos,high,low):'<span style="color:var(--text-muted);font-size:0.72rem">—</span>'}</td>
+      <td>${clu}</td>
+      <td>${signalBadge(h.signal)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderCards(){
+  document.getElementById('stock-cards').innerHTML=HOLDINGS.map(h=>{
+    const p=state.prices[h.ticker];const s=state.settings[h.id];
+    const price=p?.price;const chg=p?.change;const pct=p?.pct;
+    const high=p?.w52h||h.week52H;const low=p?.w52l||h.week52L;
+    const pos=price?w52pos(price,high,low):null;
+    const avgP=s.avgPrice;const qty=s.qty;
+    const pnlPct=(price&&avgP)?((price-avgP)/avgP*100):null;
+    const pnlAmt=(price&&avgP&&qty)?((price-avgP)*qty):null;
+    const totalVal=(price&&qty)?(price*qty):null;
+    let w52warn='';
+    if(pos!=null){
+      if(pos>=80)w52warn='<div class="warn-banner" style="margin-top:8px">🔴 52주 고점 근처 — 신규 매수 주의 구간</div>';
+      else if(pos<=20)w52warn='<div class="info-banner" style="margin-top:8px">🟢 52주 저점 근처 — 관심 구간</div>';
+    }
+    let sl1c='sl-ok',sl1d='dot-ok',sl2c='sl-ok',sl2d='dot-ok',sl3c='sl-ok',sl3d='dot-ok';
+    if(pnlPct!=null){
+      if(pnlPct<=-25){sl1c='sl-danger';sl1d='dot-danger';sl2c='sl-danger';sl2d='dot-danger';}
+      else if(pnlPct<=-15){sl1c='sl-warn';sl1d='dot-warn';}
+    }
+    if(pos!=null&&pos<=5){sl3c='sl-danger';sl3d='dot-danger';}
+    return `<div class="stock-card" id="card-${h.id}">
+      <div class="stock-card-header">
+        <div class="sc-left">
+          <div class="sc-name">${h.name}</div>
+          <div class="sc-meta">
+            <span>${h.ticker}</span><span>|</span>
+            <span style="cursor:help" onclick="showTooltip('Moat')">Moat ${h.moat}</span>
+            <span>${h.moatType}</span>
+          </div>
+        </div>
+        <div class="sc-right">
+          <div class="sc-price ${priceCls(chg||0)}">${price?fmt(Math.round(price))+'원':'⏳ 로딩'}</div>
+          <div class="sc-change ${priceCls(chg||0)}">${chg!=null?fmtP(pct)+' ('+fmt(Math.round(chg))+'원)':''}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+        <div class="cluster-pill"><span class="c-label">가치평가</span><span class="c-signal">${h.c1}</span></div>
+        <div class="cluster-pill"><span class="c-label">기업체력</span><span class="c-signal">${h.c2}</span></div>
+        <div class="cluster-pill"><span class="c-label">타이밍</span><span class="c-signal">${h.c3}</span></div>
+        <div style="margin-left:auto">${signalBadge(h.signal)}</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-box">
+          <div class="sc-box-title">📊 핵심 재무 지표</div>
+          <div class="metrics-mini">
+            <div class="metric-m"><div class="m-val">${h.per?h.per+'배':'—'}</div>
+              <div class="m-lbl" onclick="showTooltip('PER')">PER ℹ</div>
+              <div class="m-sub">${h.perVsAvg}</div></div>
+            <div class="metric-m"><div class="m-val">${h.pbr?h.pbr+'배':'—'}</div>
+              <div class="m-lbl" onclick="showTooltip('PBR')">PBR ℹ</div>
+              <div class="m-sub">${h.pbr&&h.pbr<1?'🟢 1배 이하':h.pbr&&h.pbr<2?'🟡 1~2배':'🔴 2배 초과'}</div></div>
+            <div class="metric-m"><div class="m-val">${h.roe?h.roe+'%':'—'}</div>
+              <div class="m-lbl" onclick="showTooltip('ROE')">ROE ℹ</div>
+              <div class="m-sub">${h.roe&&h.roe>=15?'🟢 우수':h.roe&&h.roe>=10?'🟡 양호':'🔴 낮음'}</div></div>
+          </div>
+        </div>
+        <div class="sc-box">
+          <div class="sc-box-title">💼 내 포지션</div>
+          ${avgP?`<div class="pos-grid">
+            <div class="pos-item"><div class="p-lbl">평균매수가</div><div class="p-val">${fmt(avgP)}원</div></div>
+            <div class="pos-item"><div class="p-lbl">보유수량</div><div class="p-val">${qty?qty+'주':'미입력'}</div></div>
+            <div class="pos-item"><div class="p-lbl">수익률</div><div class="p-val ${pnlPct!=null?pnlCls(pnlPct):''}">${pnlPct!=null?fmtP(pnlPct):'—'}</div></div>
+            <div class="pos-item"><div class="p-lbl">평가손익</div><div class="p-val ${pnlAmt!=null?pnlCls(pnlAmt):''}">${pnlAmt!=null?(pnlAmt>=0?'+':'')+fmt(Math.round(pnlAmt))+'원':'—'}</div></div>
+            ${totalVal?`<div class="pos-item"><div class="p-lbl">평가금액</div><div class="p-val">${fmt(Math.round(totalVal))}원</div></div>`:''}
+          </div>`:`<div style="color:var(--text-muted);font-size:0.8rem;padding:8px 0">⚙️ 보유 종목 설정에서<br>평균매수가를 입력해주세요.</div>`}
+        </div>
+      </div>
+      <div class="sc-box" style="margin-bottom:10px">
+        <div class="sc-box-title">📍 52주 가격 위치</div>
+        ${pos!=null?gaugeHTML(pos,high,low):'<span style="color:var(--text-muted);font-size:0.8rem">📈 시장 업데이트 후 표시됩니다</span>'}
+        ${w52warn}
+      </div>
+      <div class="analysis-box">
+        <div class="a-title"><span>🤖 이선생 분석</span><span style="font-weight:400">${h.analysisDate} 기준</span></div>
+        <div class="a-text">${h.analysis}</div>
+      </div>
+      <div class="sc-box">
+        <div class="sc-box-title">🛡️ 손절 룰 (3단계)</div>
+        <div class="stoploss-row">
+          <div class="sl-stage ${sl1c}"><div class="sl-dot ${sl1d}"></div><span>1단계 재검토: 고점 대비 -15% → 이메일 알림 (매수 이유 재점검)</span></div>
+          <div class="sl-stage ${sl2c}"><div class="sl-dot ${sl2d}"></div><span>2단계 비중축소: 고점 대비 -25% → 절반 매도 권고 알림</span></div>
+          <div class="sl-stage ${sl3c}"><div class="sl-dot ${sl3d}"></div><span>3단계 전량매도: 52주 최저가 이탈 → 전량 매도 권고 알림</span></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderSectors(){
+  document.getElementById('sector-grid').innerHTML=SECTORS.map(s=>`
+    <div class="sector-card">
+      <div class="sector-card-top">
+        <span class="s-name">${s.name}</span>
+        <span class="s-cycle ${s.cycleClass}">${s.cycle}</span>
+      </div>
+      <p>${s.desc}</p>
+      <div class="sector-signals">
+        <div class="s-sig-item"><span class="si-lbl">가치</span><span class="si-val">${s.c1}</span></div>
+        <div class="s-sig-item"><span class="si-lbl">체력</span><span class="si-val">${s.c2}</span></div>
+        <div class="s-sig-item"><span class="si-lbl">타이밍</span><span class="si-val">${s.c3}</span></div>
+      </div>
+    </div>`).join('');
+}
+
+function showTooltip(key){
+  const t=TOOLTIPS[key]||'';const lines=t.split('\n');
+  document.getElementById('modal-title').textContent=lines[0];
+  document.getElementById('modal-body').innerHTML=lines.slice(2).join('<br>');
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+
+function scrollToCard(id){
+  const el=document.getElementById('card-'+id);
+  if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderAll(){renderSummary();renderCards();}
+
+async function init(){
+  renderSectors();renderAll();
+  const ok=await fetchPrices();
+  if(ok)renderAll();
+}
+
+init();
+</script>
 </body>
 </html>
